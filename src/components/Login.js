@@ -44,11 +44,18 @@ class Login extends Component {
     }
     
     render() {
+
+        
+        if (AuthService.isAuthenticated()) {
+            return <Redirect to="/" />;
+        }
+
         if (this.state.loggedIn) {
             return <Redirect to="/" />
         }
         return (
             <div>
+                
                 <h1>Login</h1>
                 { this.state.alert !== null ? <Alert message={this.state.alert} /> : ""}
                 <form onSubmit={this.handleSubmit}>
