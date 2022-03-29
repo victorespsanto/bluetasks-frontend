@@ -24,10 +24,16 @@ class TaskListTable extends Component {
         this.onEditHandler = this.onEditHandler.bind(this);
     }
     
-    /*
+    
     componentDidMount() {
         this.listTasks();
-    }*/
+    }
+
+    componentWillUnmount() {    
+        this.setState = (state, callback) => {
+            return;
+        };
+    }
 
     listTasks() {
         if (!AuthService.isAuthenticated()) {
