@@ -3,14 +3,7 @@ import { API_ENDPOINT } from "../constants";
 import AuthService from "./AuthService";
 
 class TaskService {
-    constructor() {
-        this.tasks = [
-           { id: 1, description: "Tarefa 1", whenToDo: "2022-01-02", done: false},
-           { id: 2, description: "Tarefa 2", whenToDo: "2022-01-08", done: true},
-           { id: 3, description: "Tarefa 3", whenToDo: "2022-01-10", done: false},
-        ]
-        
-    }
+    
 
     list(onFetch, onError) {
         axios.get(`${API_ENDPOINT}/tasks?sort=whenToDo,asc`, this.buildAuthHeader())
@@ -18,21 +11,29 @@ class TaskService {
             .catch(e => onError(e));
     }
 
-    load(id) {
-        return this.tasks.filter(t => t.id === id)[0];
+    load(id, onLoad, onError) {
+        axios.get(`${API_ENDPOINT}/tasks/${id}`, this.buildAuthHeader())
+            .then((response) => onLoad(response.data))
+            .catch(e => onError(e));
     }
 
-    delete(id) {
-        this.tasks = this.tasks.filter(task => task.id !== id);
+    delete(id, onDelete, onError) {
+        axios.delete(`${API_ENDPOINT}/tasks/${id}`, this.buildAuthHeader())
+            .then(() => onDelete())
+            .catch(e => onError(e));
     }
 
-    save(task) {
-        if (task.id !== 0) {
-            this.tasks = this.tasks.map(t => task.id !== t.id ? t : task)
+    // TODO: continuar a partir daqui na lição 21.11
+
+    save(task, onSave, onError) {
+        if (task.id === 0) {
+           axios.post(`${API_ENDPOINT}/tasks`, task, this.buildAuthHeader())
+                .then(() => onSave())
+                .catch(e => onError(e));
         } else {
-            const taskId = Math.max(...this.tasks.map(t => t.id)) + 1;
-            task.id = taskId;
-            this.tasks.push(task);
+            axios.put(`${API_ENDPOINT}/tasks/${task.id}`, task, this.buildAuthHeader())
+                .then(() => onSave())
+                .catch(e => onError(e));
         }
         
     }

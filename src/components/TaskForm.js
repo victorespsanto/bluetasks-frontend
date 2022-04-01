@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import TaskService from '../api/TaskService';
 import { Redirect } from 'react-router-dom';
 import AuthService from '../api/AuthService';
+import Spinner from './Spinner';
+import Alert from './Alert';
 
 
 class TaskForm extends Component {
@@ -17,6 +19,9 @@ class TaskForm extends Component {
             }, 
             redirect: false,
             buttonName: "Cadastrar",
+            alert: null,
+            loading: false,
+            saving: false,            
         }
 
         this.onSubmitHandler = this.onSubmitHandler.bind(this);
@@ -29,8 +34,25 @@ class TaskForm extends Component {
         const editId = this.props.match.params.id;
 
         if (editId) { 
-            const task = TaskService.load(~~editId);
-            this.setState( {task: task , buttonName: "Alterar"});
+            this.setState( {loading: true});
+            TaskService.load(
+                ~~editId,
+                task => {
+                    this.setState( {task: task , buttonName: "Alterar", loading: false})
+                },
+                error => {
+                    if (error.response) {
+                        if (error.response.status === 404) {
+                            this.SetErrorState("Tarefa não encontrada");
+                        } else {
+                            this.SetErrorState(`Erro ao carregar dados: ${error.response}`);
+                        }
+                        
+                    } else {
+                        this.SetErrorState( `Erro na requisição: ${error.message}`);
+                    }
+                });
+            ;
         }
 
         //console.log("Informação do id: " + ~~editId); 
@@ -38,10 +60,24 @@ class TaskForm extends Component {
         
     }
 
+    SetErrorState(error) {
+        this.setState( {alert: error, loading: false, saving: false})
+    }
+
     onSubmitHandler(event) {
-        event.preventDefault();        
-        TaskService.save(this.state.task);
-        this.setState( {redirect: true} );
+        event.preventDefault();     
+        this.setState( {saving: true, alert: null});
+        TaskService.save(
+            this.state.task,
+            () => this.setState( {redirect: true, saving: false}),
+            error => {
+                if (error.response) {
+                    this.SetErrorState(`Erro: ${error.response.data.error}`);
+                } else {
+                    this.SetErrorState(`Erro na requisição: ${error.message}`);
+                }
+            }             
+        );        
     }
 
     onInputChangeHandler(event) {
@@ -60,9 +96,14 @@ class TaskForm extends Component {
         if (this.state.redirect) {
             return <Redirect to="/"/>
         }
+
+        if (this.state.loading) {
+            return <Spinner />
+        }
         return (
             <div>
                 <h1>Cadastro da Tarefa</h1>
+                { this.state.alert != null ? <Alert message={this.state.alert} /> : ""}
                 <form onSubmit={this.onSubmitHandler}>
                     <div className='form-group'>
                         <label htmlFor='description'>Descrição</label>
@@ -85,8 +126,15 @@ class TaskForm extends Component {
                     <button 
                         type='submit' 
                         className='btn btn-primary' 
+                        disabled={this.state.saving}
                         style={{marginTop: 10}}>
-                            {this.state.buttonName}
+                            {
+                                 this.state.saving ?
+                                    <span className="spinner-border spinner-border-sm"
+                                        role="status" aria-hidden="true">
+                                    </span>
+                                : this.state.buttonName 
+                             }
                     </button>
                     &nbsp;&nbsp;
                     <button 

@@ -6,6 +6,7 @@ import { Redirect } from 'react-router-dom';
 import AuthService from '../api/AuthService';
 import Spinner from './Spinner';
 import Alert from './Alert';
+import Moment from 'react-moment';
 
 class TaskListTable extends Component {
 
@@ -26,13 +27,9 @@ class TaskListTable extends Component {
     
     
     componentDidMount() {
-        this.listTasks();
-    }
 
-    componentWillUnmount() {    
-        this.setState = (state, callback) => {
-            return;
-        };
+        this.listTasks();
+        
     }
 
     listTasks() {
@@ -53,9 +50,15 @@ class TaskListTable extends Component {
 
     onDeleteHandler(id) {
         if (window.confirm("Deseja realmente excluir a tarefa?")) {
-            TaskService.delete(id);
-            this.listTasks();
-            toast.success("Tarefa excluída",  {theme: "colored",  position: toast.POSITION.TOP_LEFT});
+            TaskService.delete(
+                id, 
+                () => {
+                    this.listTasks();
+                    toast.success("Tarefa excluída",  {theme: "colored",  position: toast.POSITION.TOP_LEFT});
+                },
+                error => this.SetErrorState(error)
+            );
+            
         }        
     }
 
@@ -64,10 +67,17 @@ class TaskListTable extends Component {
         //alert(TaskService.load(id).id + "---" + this.state.editId );
     }
 
-    onStatusChangeHandler(task) {
-        task.done = !task.done;
-        TaskService.save(task);
-        this.listTasks();
+    onStatusChangeHandler(task) {        
+        task.done = !task.done;        
+        
+        TaskService.save(
+            task,
+            () => {
+                const tasks = this.state.tasks.map(t => t.id !== task.id ? t : task);
+                this.setState({ tasks: tasks});
+            },
+            error => this.setErrorState(error));
+       
     }
 
 
@@ -122,12 +132,17 @@ const TableBody = (props) => {
         <tbody >
             {props.tasks.map(task => 
                 <tr key={task.id}>
-                    <td><input type="checkbox" 
+                    <td>
+                        <input type="checkbox"                         
                         checked={task.done}
                         onChange={() => props.onStatusChange(task)} />
                     </td> 
-                    <td>{ task.done ? <s>{task.description}</s> : task.description}</td>
-                    <td>{ task.done ? <s>{task.whenToDo}</s> : task.whenToDo}</td>          
+                    <td>{ task.done ? <s>{task.description}</s>: task.description}</td>
+                    <td>{ task.done ? 
+                        <s><Moment format="DD/MM/YYYY">{task.whenToDo}</Moment></s> 
+                         : <Moment format="DD/MM/YYYY">{task.whenToDo}</Moment> 
+                         }
+                    </td>          
                     <td>
                         <input type="button" 
                             className='btn btn-primary' 
