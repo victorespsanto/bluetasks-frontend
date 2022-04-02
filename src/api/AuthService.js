@@ -26,6 +26,10 @@ class AuthService {
         return this.getJWTToken() != null;
     }
 
+    logout() {
+        sessionStorage.removeItem(JWT_TOKEN_NAME);
+    }
+
 
 
 }

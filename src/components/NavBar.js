@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import AuthService from '../api/AuthService';
 import { APP_NAME } from '../constants';
 import NavBarItem from './NavBarItem';
 
@@ -15,6 +16,7 @@ class NavBar extends Component {
         }
 
         this.onClickHandler = this.onClickHandler.bind(this);
+        this.onLogoutHandler = this.onLogoutHandler.bind(this);
     }
 
     onClickHandler(itemClicked) {
@@ -31,6 +33,11 @@ class NavBar extends Component {
         this.setState({ items });
             
     }
+
+    onLogoutHandler() {
+        AuthService.logout();
+        this.props.onLinkClick();
+    }
     
 
     render() {  // a classe pai renderiza a classe filha com os props informados na tag da classe filha
@@ -45,10 +52,16 @@ class NavBar extends Component {
                     <div className="collapse navbar-collapse" id="navbarText">
                         <div className="navbar-nav mr-auto">
                             {this.state.items.map(
-                            (i) => <NavBarItem 
-                            key = {i.name}
-                            item = {i}                        
-                            onClick = {this.onClickHandler} />)}   
+                                (i) => <NavBarItem 
+                                key = {i.name}
+                                item = {i}                        
+                                onClick = {this.onClickHandler} />)}  
+                            {AuthService.isAuthenticated() ?
+                                <NavBarItem 
+                                    item={{ name: "Logout", active: false, href:  "#"}}
+                                    onClick = {this.onLogoutHandler} />
+
+                                : ""}
                         </div>
                     </div>
                 </nav>

@@ -30,6 +30,7 @@ class Login extends Component {
     handleLoginResponse(success) {
         if (success) {
             this.setState( {loggedIn : true});
+            this.props.onLoginSuccess();
         } else {
             this.setState( { alert: "O login não pode ser realizado"})
         }
