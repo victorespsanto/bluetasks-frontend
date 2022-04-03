@@ -43,8 +43,8 @@ class NavBar extends Component {
     render() {  // a classe pai renderiza a classe filha com os props informados na tag da classe filha
                 // a criaçao dos states permite iterar sobre os componentes do state através da funçao map e o que ela deve fazer com os componentes
         return (
-            <div>
-                <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div >
+                <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-5">
                     <span className="navbar-brand mb-0 h1" >{APP_NAME}</span>
                     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
@@ -61,8 +61,13 @@ class NavBar extends Component {
                                     item={{ name: "Logout", active: false, href:  "#"}}
                                     onClick = {this.onLogoutHandler} />
 
-                                : ""}
+                                : ""
+                            }
                         </div>
+                        <span className="navbar-text ms-auto" >
+                            { AuthService.isAuthenticated() ?
+                                `Olá, ${AuthService.getJWTTokenData().displayName}!` : ""}
+                        </span>
                     </div>
                 </nav>
                    

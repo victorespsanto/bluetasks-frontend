@@ -29,12 +29,11 @@ class Login extends Component {
 
     handleLoginResponse(success) {
         if (success) {
-            this.setState( {loggedIn : true});
+            this.setState( {loggedIn : true, processing: false});
             this.props.onLoginSuccess();
         } else {
-            this.setState( { alert: "O login não pode ser realizado"})
+            this.setState( { alert: "O login não pode ser realizado", processing: false});
         }
-        this.setState( {processing: false} );
     }
 
     handleInputChanged(event) {
